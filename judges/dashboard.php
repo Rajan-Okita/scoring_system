@@ -21,80 +21,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_score'])) {
 
 $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DESC");
 ?>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Judge Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial; margin: 0; background-color: #f0f2f5; display: flex; }
-        .sidebar {
-            width: 250px;
-            background-color: #343a40;
-            color: white;
-            padding-top: 20px;
-            height: 100vh;
-            position: fixed;
+        body {
+            background-color: #f8f9fa;
+            padding-top: 50px;
         }
-        .sidebar a {
-            display: block;
-            padding: 15px 20px;
-            color: white;
-            text-decoration: none;
+        .card {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .main-content {
-            margin-left: 250px;
-            padding: 40px;
-            width: calc(100% - 250px);
-        }
-        h2, h3 { text-align: center; }
-        .message { color: green; text-align: center; margin-top: 15px; font-weight: bold; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        input, button { padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        button { background-color: #007bff; color: white; border: none; cursor: pointer; transition: background 0.3s; }
-        button:hover { background-color: #0056b3; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        th { background-color: #f8f8f8; }
-        form.inline-form { display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2 style="text-align:center;">Judge Panel</h2>
-    <a href="#">👥 View & Edit Scores</a>
-</div>
+<div class="container">
+    <h2 class="mb-4 text-center">🧑‍⚖️ Judge Dashboard</h2>
 
-<div class="main-content">
     <?php if ($showMessage): ?>
-        <div class="message"> <?= $message ?> </div>
+        <div class="alert alert-success text-center"><?= $message ?></div>
     <?php endif; ?>
 
-    <div class="card">
-        <h3>Participants and Their Scores</h3>
-        <table>
-            <tr>
-                <th>Participant</th>
-                <th>Current Score</th>
-                <th>Update Score</th>
-            </tr>
-            <?php while ($user = $users->fetch_assoc()): ?>
+    <div class="card p-4">
+        <h5 class="mb-3 text-center">Participants and Their Scores</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-light">
                 <tr>
-                    <td><?= htmlspecialchars($user['name']) ?></td>
-                    <td><?= $user['score'] ?></td>
-                    <td>
-                        <form method="POST" class="inline-form">
-                            <input type="hidden" name="user_id" value="<?= $user['users_id'] ?>">
-                            <input type="number" name="points" min="0" max="100" value="<?= $user['score'] ?>" required>
-                            <button type="submit" name="update_score">Update</button>
-                        </form>
-                    </td>
+                    <th>Participant</th>
+                    <th>Current Score</th>
+                    <th>Update Score</th>
                 </tr>
-            <?php endwhile; ?>
-        </table>
+                </thead>
+                <tbody>
+                <?php while ($user = $users->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($user['name']) ?></td>
+                        <td><?= $user['score'] ?></td>
+                        <td>
+                            <form method="POST" class="d-flex justify-content-center align-items-center gap-2">
+                                <input type="hidden" name="user_id" value="<?= $user['users_id'] ?>">
+                                <input type="number" name="points" min="0" max="100" value="<?= $user['score'] ?>" class="form-control" style="max-width: 100px;" required>
+                                <button type="submit" name="update_score" class="btn btn-primary btn-sm">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

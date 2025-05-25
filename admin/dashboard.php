@@ -1,5 +1,6 @@
 <?php
 include '../auth/connection.php';
+
 $message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,55 +26,106 @@ $judges = $con->query("SELECT * FROM judges");
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Admin Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; padding: 40px; background-color: #f0f2f5; }
-        h2, h3 { text-align: center; }
-        form, table { max-width: 700px; margin: 20px auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        button { background-color: #007BFF; color: white; border: none; cursor: pointer; transition: background 0.3s; }
-        button:hover { background-color: #0056b3; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        table th, table td { border: 1px solid #ccc; padding: 12px; text-align: center; }
-        table th { background-color: #f8f8f8; }
-        .message { color: green; text-align: center; margin-top: 15px; font-weight: bold; }
+        body {
+            background-color: #f4f6f8;
+            padding-top: 80px;
+        }
+        .card {
+            margin-bottom: 30px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        .message {
+            color: green;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-<h2>Admin Dashboard</h2>
-<?php if (!empty($message)): ?>
-    <div class="message"><?= $message ?></div>
-<?php endif; ?>
+<div class="container">
+    <h2 class="text-center mb-4">Admin Dashboard</h2>
 
-<form method="POST">
-    <h3>Add New Judge</h3>
-    <input type="text" name="first_name" placeholder="First Name" required>
-    <input type="text" name="last_name" placeholder="Last Name" required>
-    <input type="email" name="email" placeholder="Email Address" required>
-    <input type="text" name="display_name" placeholder="Display Name" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <button type="submit">Add Judge</button>
-</form>
+    <?php if (!empty($message)): ?>
+        <div class="message"><?= $message ?></div>
+    <?php endif; ?>
 
-<h3>Existing Judges</h3>
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Display Name</th>
-    </tr>
-    <?php while ($judge = $judges->fetch_assoc()): ?>
-        <tr>
-            <td><?= htmlspecialchars($judge['first_name'] . ' ' . $judge['last_name']) ?></td>
-            <td><?= htmlspecialchars($judge['email_address']) ?></td>
-            <td><?= htmlspecialchars($judge['display_name']) ?></td>
-        </tr>
-    <?php endwhile; ?>
-</table>
+    <ul class="nav nav-tabs justify-content-center mb-4" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="add-tab" data-bs-toggle="tab" data-bs-target="#add" type="button" role="tab">➕ Add Judge</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="view-tab" data-bs-toggle="tab" data-bs-target="#view" type="button" role="tab">👥 View Judges</button>
+        </li>
+    </ul>
 
+    <div class="tab-content">
+        <!-- Add Judge -->
+        <div class="tab-pane fade show active" id="add" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Add New Judge</div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <input type="text" name="first_name" class="form-control" placeholder="First Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" name="last_name" class="form-control" placeholder="Last Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" name="display_name" class="form-control" placeholder="Display Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" name="password" class="form-control" placeholder="Password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Add Judge</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Judges -->
+        <div class="tab-pane fade" id="view" role="tabpanel">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">Existing Judges</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Display Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php while ($judge = $judges->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($judge['first_name'] . ' ' . $judge['last_name']) ?></td>
+                                    <td><?= htmlspecialchars($judge['email_address']) ?></td>
+                                    <td><?= htmlspecialchars($judge['display_name']) ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

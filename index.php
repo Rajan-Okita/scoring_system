@@ -1,33 +1,25 @@
+<?php include 'navbar.php'; ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Judging System Home</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f8f9fa; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .container { text-align: center; background: white; padding: 50px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h1 { margin-bottom: 30px; font-size: 32px; }
-        a.button {
-            display: inline-block;
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 18px;
-            text-decoration: none;
-            color: white;
-            background-color: #007bff;
-            border-radius: 6px;
-            transition: background 0.3s;
-        }
-        a.button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scoring System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <div class="container">
-    <h1>Welcome to the Judging System</h1>
-    <a class="button" href="admin/login.php">🔐 Admin Portal</a>
-    <a class="button" href="judges/login.php">🧑‍⚖️ Judge Panel</a>
-    <a class="button" href="scoreboard.php">📊 View Scoreboard</a>
+    <div class="welcome-box">
+        <h1>Welcome to the Judging System</h1>
+        <div class="d-grid gap-2 d-md-flex justify-content-center">
+            <a href="admin/login.php" class="btn btn-primary btn-custom">🔐 Admin Portal</a>
+            <a href="judges/login.php" class="btn btn-success btn-custom">🧑‍⚖️ Judge Panel</a>
+            <a href="scoreboard.php" class="btn btn-info text-white btn-custom">📊 View Scoreboard</a>
+        </div>
+    </div>
 </div>
+
 </body>
 </html>
