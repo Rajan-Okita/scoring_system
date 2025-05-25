@@ -1,6 +1,25 @@
 <?php
 include './auth/connection.php';
+
+if (isset($_GET['search'])) {
+    $search = trim($_GET['search']);
+    $searchTerm = "%" . $search . "%";
+
+    $stmt = $con->prepare("SELECT name, score FROM users WHERE name LIKE ? ORDER BY score DESC");
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['score']) . "</td>";
+        echo "</tr>";
+    }
+    exit;
+}
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +43,7 @@ include './auth/connection.php';
     <script>
         function searchUsers(value) {
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'search_users.php?search=' + encodeURIComponent(value), true);
+            xhr.open('GET', 'scoreboard.php?search=' + encodeURIComponent(value), true);
             xhr.onload = function () {
                 if (xhr.status === 200) {
                     document.getElementById('table-body').innerHTML = xhr.responseText;
