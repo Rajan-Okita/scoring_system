@@ -52,13 +52,28 @@ if (isset($_GET['search'])) {
             xhr.send();
         }
 
+        function pollUpdates() {
+            fetch('long_poll.php?last=' + (window.lastUpdate || 0))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'update') {
+                        window.lastUpdate = data.last;
+                        searchUsers(document.getElementById('search').value);
+                    }
+                    pollUpdates();
+                })
+                .catch(() => {
+                    setTimeout(pollUpdates, 1000);
+                });
+        }
+
         window.onload = function () {
             const input = document.getElementById('search');
             input.addEventListener('keyup', function () {
                 searchUsers(this.value);
             });
-
             searchUsers('');
+            pollUpdates();
         };
     </script>
 </head>
