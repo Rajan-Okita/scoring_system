@@ -38,6 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #f8f9fa;
             padding-top: 80px;
             margin: 0;
+            background:
+                    linear-gradient(135deg, rgba(30, 60, 114, 0.8), rgba(109, 158, 255, 0.8)),
+                    url("https://images.pexels.com/photos/7233099/pexels-photo-7233099.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+            background-attachment: fixed;
+            background-size: cover;
         }
         .login-box {
             max-width: 600px;

@@ -46,6 +46,11 @@ $judges = $con->query("SELECT * FROM judges");
         body {
             background-color: #f4f6f8;
             padding-top: 56px;
+            background:
+                    linear-gradient(135deg, rgba(30, 60, 114, 0.8), rgba(109, 158, 255, 0.8)),
+                    url("https://images.pexels.com/photos/7233099/pexels-photo-7233099.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+            background-attachment: fixed;
+            background-size: cover;
         }
         .sidebar {
             height: 100vh;
@@ -97,7 +102,7 @@ $judges = $con->query("SELECT * FROM judges");
         <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="pt-4">
-                <h2 class="text-center mb-4">Admin Dashboard</h2>
+                <h2 class="text-center mb-4 text-white">Admin Dashboard</h2>
 
                 <?php if (!empty($message)): ?>
                     <div class="message alert alert-info" id="feedbackMessage"><?= $message ?></div>

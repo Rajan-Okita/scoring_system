@@ -34,6 +34,11 @@ $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DES
         body {
             background-color: #f8f9fa;
             padding-top: 56px;
+            background:
+                    linear-gradient(135deg, rgba(30, 60, 114, 0.8), rgba(109, 158, 255, 0.8)),
+                    url("https://images.pexels.com/photos/7233099/pexels-photo-7233099.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2");
+            background-attachment: fixed;
+            background-size: cover;
         }
         .sidebar {
             height: 100vh;
@@ -79,7 +84,7 @@ $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DES
 
         <!-- Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
-            <h2 class="text-center mb-4">🧑‍⚖️ Judge Dashboard</h2>
+            <h2 class="text-center mb-4 text-white">🧑‍⚖️ Judge Dashboard</h2>
 
             <?php if ($showMessage): ?>
                 <div class="alert alert-success text-center"><?= $message ?></div>
