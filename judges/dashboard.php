@@ -1,5 +1,6 @@
 <?php
 include '../auth/connection.php';
+
 $message = "";
 $showMessage = false;
 
@@ -32,52 +33,119 @@ $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DES
     <style>
         body {
             background-color: #f8f9fa;
-            padding-top: 50px;
+            padding-top: 56px;
+        }
+        .sidebar {
+            height: 100vh;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 12px 20px;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
         }
         .card {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+        #searchInput {
+            max-width: 300px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 class="mb-4 text-center">🧑‍⚖️ Judge Dashboard</h2>
+<!-- Top Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Judge Panel</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
 
-    <?php if ($showMessage): ?>
-        <div class="alert alert-success text-center"><?= $message ?></div>
-    <?php endif; ?>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar text-white">
+            <a href="../index.php">🏠 Home</a>
+            <a href="#">👥 Manage Scores</a>
+        </nav>
 
-    <div class="card p-4">
-        <h5 class="mb-3 text-center">Participants and Their Scores</h5>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle text-center">
-                <thead class="table-light">
-                <tr>
-                    <th>Participant</th>
-                    <th>Current Score</th>
-                    <th>Update Score</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php while ($user = $users->fetch_assoc()): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($user['name']) ?></td>
-                        <td><?= $user['score'] ?></td>
-                        <td>
-                            <form method="POST" class="d-flex justify-content-center align-items-center gap-2">
-                                <input type="hidden" name="user_id" value="<?= $user['users_id'] ?>">
-                                <input type="number" name="points" min="0" max="100" value="<?= $user['score'] ?>" class="form-control" style="max-width: 100px;" required>
-                                <button type="submit" name="update_score" class="btn btn-primary btn-sm">Update</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 pt-4">
+            <h2 class="text-center mb-4">🧑‍⚖️ Judge Dashboard</h2>
+
+            <?php if ($showMessage): ?>
+                <div class="alert alert-success text-center"><?= $message ?></div>
+            <?php endif; ?>
+
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Participants and Their Scores</h5>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search participant...">
+                </div>
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle text-center" id="participantsTable">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Participant</th>
+                                <th>Current Score</th>
+                                <th>Update Score</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php while ($user = $users->fetch_assoc()): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($user['name']) ?></td>
+                                    <td><?= $user['score'] ?></td>
+                                    <td>
+                                        <form method="POST" class="d-flex justify-content-center align-items-center gap-2">
+                                            <input type="hidden" name="user_id" value="<?= $user['users_id'] ?>">
+                                            <input type="number" name="points" min="0" max="100" value="<?= $user['score'] ?>" class="form-control" style="max-width: 100px;" required>
+                                            <button type="submit" name="update_score" class="btn btn-primary btn-sm">Update</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Live search filter
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('#participantsTable tbody tr');
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        tableRows.forEach(row => {
+            const nameCell = row.querySelector('td:first-child');
+            const name = nameCell.textContent.toLowerCase();
+            row.style.display = name.includes(query) ? '' : 'none';
+        });
+    });
+
+    // Auto-hide success message after 5 seconds
+    const alertBox = document.querySelector('.alert-success');
+    if (alertBox) {
+        setTimeout(() => {
+            alertBox.style.display = 'none';
+        }, 5000);
+    }
+</script>
 </body>
 </html>
