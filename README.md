@@ -124,3 +124,4 @@ $database = "input own name used";
 - Score history tracking per judge and participant
 - Export scoreboard as CSV or PDF
 - Implementation of sessions and logout from the system
+- Indexing of columns in database for faster search in case of large records 
