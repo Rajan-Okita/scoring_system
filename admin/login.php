@@ -1,5 +1,6 @@
 <?php
 include '../auth/connection.php';
+include 'admin_navbar.php';
 
 $message = "";
 
@@ -35,15 +36,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             background-color: #f8f9fa;
-            padding-top: 100px;
+            padding-top: 80px;
+            margin: 0;
         }
         .login-box {
-            max-width: 400px;
-            margin: auto;
-            padding: 40px;
+            max-width: 600px;
+            margin: 100px auto 40px;
+            padding: 30px 40px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
         .message {
             margin-top: 10px;

@@ -107,7 +107,7 @@ $judges = $con->query("SELECT * FROM judges");
                     <!-- Add Judge -->
                     <div class="tab-pane fade show active" id="add">
                         <div class="card">
-                            <div class="card-header bg-primary text-white">Add New Judge</div>
+                            <div class="card-header bg-secondary text-white">Add New Judge</div>
                             <div class="card-body">
                                 <form method="POST">
                                     <div class="mb-3"><input type="text" name="first_name" class="form-control" placeholder="First Name" required></div>
