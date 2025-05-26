@@ -5,7 +5,7 @@ This is a simple web application built on the LAMP (Linux, Apache, MySQL, PHP) s
 ## 🌐 Live Demo
 You can access the application online via the link below:
 
-👉 [http://judge.tisatisainc.com/index.php](http://judge.tisatisainc.com/index.php)
+👉 [www.judge.tisatisainc.com/index.php](https://judge.tisatisainc.com/index.php)
 
 Use the following credentials to log in as an admin:
 - **Email**: admin@gmail.com
