@@ -55,8 +55,18 @@ CREATE TABLE users (
 
 INSERT INTO users 
 (users_id, name, score) VALUES
-('', 'James','10'),
-('','Peter','');
+('', 'James Omondi','30'),
+('', 'Peter ','10'),
+('', 'Gibson Viol','60'),
+('', 'Gift','40'),
+('', 'Steve','80'),
+('', 'Winnie',''),
+('', 'Joy kitha','25'),
+('', 'Wendy Wangechi','55'),
+('', 'Japheth Okong','99'),
+('', 'James Kiama','50'),
+('', 'Jane Wanjiku','70'),
+('','Peter Michael','');
 
 CREATE TABLE admin (
     admin_id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -113,3 +123,4 @@ $database = "input own name used";
 - Authentication with session handling for judges and admins
 - Score history tracking per judge and participant
 - Export scoreboard as CSV or PDF
+- Implementation of sessions and logout from the system
