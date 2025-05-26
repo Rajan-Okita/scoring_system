@@ -4,6 +4,7 @@ include '../auth/connection.php';
 $message = "";
 $showMessage = false;
 
+// Handle score update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_score'])) {
     $user_id = $_POST['user_id'];
     $points = $_POST['points'];
@@ -20,7 +21,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_score'])) {
     }
 }
 
-$users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DESC");
+// Pagination setup
+$limit = 10; // Participants per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Total participants
+$totalUsersResult = $con->query("SELECT COUNT(*) AS total FROM users");
+$totalUsers = $totalUsersResult->fetch_assoc()['total'];
+$totalPages = ceil($totalUsers / $limit);
+
+// Fetch paginated users
+$users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DESC LIMIT $limit OFFSET $offset");
 ?>
 
 <!DOCTYPE html>
@@ -123,6 +135,29 @@ $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DES
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Pagination -->
+                    <nav>
+                        <ul class="pagination justify-content-center mt-4">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $page - 1 ?>">« Prev</a>
+                                </li>
+                            <?php endif; ?>
+
+                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                                    <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                </li>
+                            <?php endfor; ?>
+
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?= $page + 1 ?>">Next »</a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </main>
@@ -131,7 +166,7 @@ $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DES
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Live search filter
+    // Live search filter (current page only)
     const searchInput = document.getElementById('searchInput');
     const tableRows = document.querySelectorAll('#participantsTable tbody tr');
 
@@ -144,7 +179,7 @@ $users = $con->query("SELECT users_id, name, score FROM users ORDER BY score DES
         });
     });
 
-    // Auto-hide success message after 5 seconds
+    // Auto-hide success message
     const alertBox = document.querySelector('.alert-success');
     if (alertBox) {
         setTimeout(() => {
