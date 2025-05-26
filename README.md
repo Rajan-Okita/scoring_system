@@ -2,6 +2,14 @@
 
 ## Overview 
 This is a simple web application built on the LAMP (Linux, Apache, MySQL, PHP) stack. It allows pre-registered judges to assign scores to participants, view them in real time, and manage users from an admin dashboard.
+## 🌐 Live Demo
+You can access the application online via the link below:
+
+👉 [http://judge.tisatisainc.com/index.php](http://judge.tisatisainc.com/index.php)
+
+Use the following credentials to log in as an admin:
+- **Email**: admin@gmail.com
+- **Password**: admin123456
 
 ## Setup Instructions
 ### 1. Requirements
@@ -124,4 +132,4 @@ $database = "input own name used";
 - Score history tracking per judge and participant
 - Export scoreboard as CSV or PDF
 - Implementation of sessions and logout from the system
-- Indexing of columns in database for faster search in case of large records 
+- Indexing of columns in database for performance 
