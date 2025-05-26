@@ -1,62 +1,61 @@
 <?php
 include './auth/connection.php';
+include 'navbar.php';
 
-// Handle live search
 if (isset($_GET['search'])) {
+    $limit =10;//entries per page
+    $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
+    $offset = ($page - 1) * $limit;
     $search = trim($_GET['search']);
     $searchTerm = "%" . $search . "%";
 
-    $stmt = $con->prepare("SELECT name, score FROM users WHERE name LIKE ? ORDER BY score DESC");
-    $stmt->bind_param("s", $searchTerm);
+    // Count total results
+    $countStmt = $con->prepare("SELECT COUNT(*) as total FROM users WHERE name LIKE ?");
+    $countStmt->bind_param("s", $searchTerm);
+    $countStmt->execute();
+    $countResult = $countStmt->get_result();
+    $totalRows = $countResult->fetch_assoc()['total'];
+    $totalPages = ceil($totalRows / $limit);
+
+    // Fetch paginated data
+    $stmt = $con->prepare("SELECT name, score FROM users WHERE name LIKE ? ORDER BY score DESC LIMIT ?, ?");
+    $stmt->bind_param("sii", $searchTerm, $offset, $limit);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['score']) . "</td>";
-            echo "</tr>";
-        }
-    } else {
-        echo "<tr><td colspan='2' class='text-center'>No matching users found.</td></tr>";
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['score']) . "</td>";
+        echo "</tr>";
     }
+
+    // Pagination buttons
+    echo "<tr><td colspan='2'>";
+    echo "<div class='pagination'>";
+    for ($i = 1; $i <= $totalPages; $i++) {
+        $active = ($i == $page) ? 'active-page' : '';
+        echo "<button class='page-btn $active' onclick='goToPage($i)'>$i</button> ";
+    }
+    echo "</div>";
+    echo "</td></tr>";
+
     exit;
 }
-
-include 'navbar.php';
-
-$limit = 10;
-$page = isset($_GET['page']) ? max((int)$_GET['page'], 1) : 1;
-$offset = ($page - 1) * $limit;
-
-// Get total users
-$totalResult = $con->query("SELECT COUNT(*) AS total FROM users");
-$totalUsers = $totalResult->fetch_assoc()['total'];
-$totalPages = ceil($totalUsers / $limit);
-
-// Fetch paginated users
-$stmt = $con->prepare("SELECT name, score FROM users ORDER BY score DESC LIMIT ? OFFSET ?");
-$stmt->bind_param("ii", $limit, $offset);
-$stmt->execute();
-$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Scoreboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="scoreboard-container">
     <h2>🏆 Participant Scoreboard</h2>
-
-    <form class="scoreboard-search" onsubmit="return false;">
+    <form onsubmit="return false;">
         <input type="text" id="search" placeholder="Search by participant name">
     </form>
 
@@ -68,57 +67,54 @@ $result = $stmt->get_result();
         </tr>
         </thead>
         <tbody id="table-body">
-        <?php while ($row = $result->fetch_assoc()): ?>
-            <tr>
-                <td><?= htmlspecialchars($row['name']) ?></td>
-                <td><?= htmlspecialchars($row['score']) ?></td>
-            </tr>
-        <?php endwhile; ?>
         </tbody>
     </table>
-
-    <div class="pagination-wrapper">
-        <nav>
-            <ul class="pagination">
-                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= $page - 1 ?>">Previous</a>
-                </li>
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
-                    </li>
-                <?php endfor; ?>
-                <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= $page + 1 ?>">Next</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
 </div>
 
 <script>
-    const searchInput = document.getElementById('search');
-    const tableBody = document.getElementById('table-body');
-    const pagination = document.querySelector('.pagination-wrapper');
+    let currentPage = 1;
 
-    searchInput.addEventListener('input', function () {
-        const value = this.value.trim();
-        if (value === '') {
-            location.href = 'scoreboard.php'; // return default pagination
-            return;
-        }
-
+    function searchUsers(value, page = 1) {
+        currentPage = page;
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'scoreboard.php?search=' + encodeURIComponent(value), true);
+        xhr.open('GET', 'scoreboard.php?search=' + encodeURIComponent(value) + '&page=' + page, true);
         xhr.onload = function () {
             if (xhr.status === 200) {
-                tableBody.innerHTML = xhr.responseText;
-                pagination.style.display = 'none';
+                document.getElementById('table-body').innerHTML = xhr.responseText;
             }
         };
         xhr.send();
-    });
-</script>
+    }
 
+    function goToPage(page) {
+        const value = document.getElementById('search').value;
+        searchUsers(value, page);
+    }
+
+   //Long polling function
+    function pollUpdates() {
+        fetch('long_poll.php?last=' + (window.lastUpdate || 0))
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'update') {
+                    window.lastUpdate = data.last;
+                    searchUsers(document.getElementById('search').value, currentPage);
+                }
+                pollUpdates();
+            })
+            .catch(() => {
+                setTimeout(pollUpdates, 5000);
+            });
+    }
+
+    window.onload = function () {
+        const input = document.getElementById('search');
+        input.addEventListener('keyup', function () {
+            searchUsers(this.value);
+        });
+        searchUsers('');
+        pollUpdates();
+    };
+</script>
 </body>
 </html>
