@@ -1,6 +1,7 @@
 <?php
 include './auth/connection.php';
 
+// Handle live search
 if (isset($_GET['search'])) {
     $search = trim($_GET['search']);
     $searchTerm = "%" . $search . "%";
@@ -10,81 +11,56 @@ if (isset($_GET['search'])) {
     $stmt->execute();
     $result = $stmt->get_result();
 
-    while ($row = $result->fetch_assoc()) {
-        echo "<tr>";
-        echo "<td>" . htmlspecialchars($row['name']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['score']) . "</td>";
-        echo "</tr>";
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($row['name']) . "</td>";
+            echo "<td>" . htmlspecialchars($row['score']) . "</td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='2' class='text-center'>No matching users found.</td></tr>";
     }
     exit;
 }
+
+include 'navbar.php';
+
+$limit = 10;
+$page = isset($_GET['page']) ? max((int)$_GET['page'], 1) : 1;
+$offset = ($page - 1) * $limit;
+
+// Get total users
+$totalResult = $con->query("SELECT COUNT(*) AS total FROM users");
+$totalUsers = $totalResult->fetch_assoc()['total'];
+$totalPages = ceil($totalUsers / $limit);
+
+// Fetch paginated users
+$stmt = $con->prepare("SELECT name, score FROM users ORDER BY score DESC LIMIT ? OFFSET ?");
+$stmt->bind_param("ii", $limit, $offset);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Scoreboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 40px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; margin-bottom: 20px; }
-        form { text-align: center; margin-bottom: 20px; }
-        input[type="text"] {
-            padding: 10px;
-            width: 60%;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f1f1f1; }
-    </style>
-    <script>
-        function searchUsers(value) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', 'scoreboard.php?search=' + encodeURIComponent(value), true);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    document.getElementById('table-body').innerHTML = xhr.responseText;
-                }
-            };
-            xhr.send();
-        }
-
-        function pollUpdates() {
-            fetch('long_poll.php?last=' + (window.lastUpdate || 0))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'update') {
-                        window.lastUpdate = data.last;
-                        searchUsers(document.getElementById('search').value);
-                    }
-                    pollUpdates();
-                })
-                .catch(() => {
-                    setTimeout(pollUpdates, 1000);
-                });
-        }
-
-        window.onload = function () {
-            const input = document.getElementById('search');
-            input.addEventListener('keyup', function () {
-                searchUsers(this.value);
-            });
-            searchUsers('');
-            pollUpdates();
-        };
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
+
+<div class="scoreboard-container">
     <h2>🏆 Participant Scoreboard</h2>
-    <form onsubmit="return false;">
+
+    <form class="scoreboard-search" onsubmit="return false;">
         <input type="text" id="search" placeholder="Search by participant name">
     </form>
 
-    <table>
+    <table class="scoreboard-table" id="main-table">
         <thead>
         <tr>
             <th>Participant Name</th>
@@ -92,8 +68,57 @@ if (isset($_GET['search'])) {
         </tr>
         </thead>
         <tbody id="table-body">
+        <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+                <td><?= htmlspecialchars($row['name']) ?></td>
+                <td><?= htmlspecialchars($row['score']) ?></td>
+            </tr>
+        <?php endwhile; ?>
         </tbody>
     </table>
+
+    <div class="pagination-wrapper">
+        <nav>
+            <ul class="pagination">
+                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page - 1 ?>">Previous</a>
+                </li>
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page + 1 ?>">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
+
+<script>
+    const searchInput = document.getElementById('search');
+    const tableBody = document.getElementById('table-body');
+    const pagination = document.querySelector('.pagination-wrapper');
+
+    searchInput.addEventListener('input', function () {
+        const value = this.value.trim();
+        if (value === '') {
+            location.href = 'scoreboard.php'; // return default pagination
+            return;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'scoreboard.php?search=' + encodeURIComponent(value), true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                tableBody.innerHTML = xhr.responseText;
+                pagination.style.display = 'none';
+            }
+        };
+        xhr.send();
+    });
+</script>
+
 </body>
 </html>

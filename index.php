@@ -11,15 +11,12 @@
 <body>
 
 <div class="container">
-    <div class="welcome-box">
-        <h1>Welcome to the Judging System</h1>
-        <div class="d-grid gap-2 d-md-flex justify-content-center">
+    <div class="centered">
+            <h1>Welcome to the Scoring System</h1>
             <a href="admin/login.php" class="btn btn-primary btn-custom">🔐 Admin Portal</a>
             <a href="judges/login.php" class="btn btn-success btn-custom">🧑‍⚖️ Judge Panel</a>
             <a href="scoreboard.php" class="btn btn-info text-white btn-custom">📊 View Scoreboard</a>
-        </div>
     </div>
 </div>
-
 </body>
 </html>
